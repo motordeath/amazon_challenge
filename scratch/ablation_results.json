@@ -1,0 +1,50 @@
+{
+  "exact_recall": 519572,
+  "total_true": 1730636,
+  "results": [
+    {
+      "top_k": 20,
+      "tok_name_recall": 311358,
+      "tok_addr_recall": 546579,
+      "uncapped_recall": 1033811,
+      "uncapped_count": 18270854,
+      "capped_recall": 832220,
+      "capped_count": 8787578,
+      "runtime_sec": 239.4021234512329,
+      "peak_mem_mb": 12957.0390625
+    },
+    {
+      "top_k": 50,
+      "tok_name_recall": 421767,
+      "tok_addr_recall": 654666,
+      "uncapped_recall": 1143619,
+      "uncapped_count": 29016847,
+      "capped_recall": 822903,
+      "capped_count": 8837394,
+      "runtime_sec": 438.7475004196167,
+      "peak_mem_mb": 14098.53515625
+    },
+    {
+      "top_k": 100,
+      "tok_name_recall": 452979,
+      "tok_addr_recall": 681794,
+      "uncapped_recall": 1171725,
+      "uncapped_count": 34141242,
+      "capped_recall": 822903,
+      "capped_count": 8837394,
+      "runtime_sec": 1101.6302824020386,
+      "peak_mem_mb": 10138.48046875
+    },
+    {
+      "top_k": 200,
+      "tok_name_recall": 453278,
+      "tok_addr_recall": 682453,
+      "uncapped_recall": 1172294,
+      "uncapped_count": 34638792,
+      "capped_recall": 822903,
+      "capped_count": 8837394,
+      "runtime_sec": 1548.8596723079681,
+      "peak_mem_mb": 11607.1328125
+    }
+  ]
+}

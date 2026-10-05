@@ -1,0 +1,30 @@
+{
+  "positive": {
+    "total_evaluated": 109688,
+    "exact_name_pct": 4.62,
+    "norm_name_pct": 21.68,
+    "name_jw_mean": 0.8788,
+    "name_lev_mean": 0.7182,
+    "name_jac_mean": 0.6136,
+    "exact_addr_pct": 2.22,
+    "norm_addr_pct": 8.17,
+    "addr_jw_mean": 0.8096,
+    "addr_lev_mean": 0.6387,
+    "addr_jac_mean": 0.5966,
+    "addr_missing_pct": 4.36,
+    "country_match_pct": 100.0,
+    "us_name_jw": 0.9241,
+    "india_name_jw": 0.8119,
+    "s2_name_jw": 0.8763,
+    "s3_name_jw": 0.8812,
+    "s2_addr_jw": 0.8244,
+    "s3_addr_jw": 0.7957
+  },
+  "hard_negatives": {
+    "total_evaluated": 12347,
+    "same_name_negs": 11988,
+    "same_name_addr_jw_mean": 0.5523,
+    "same_addr_negs": 359,
+    "same_addr_name_jw_mean": 0.5503
+  }
+}

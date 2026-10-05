@@ -1,0 +1,11 @@
+{
+  "sample_size": 10000,
+  "index_pool_size": 100000,
+  "embed_time": 551.6328461170197,
+  "index_time": 0.06801009178161621,
+  "query_time": 23.623018741607666,
+  "peak_mem": 3285.078125,
+  "overall_r1": 0.6035,
+  "overall_r5": 0.7097,
+  "overall_r10": 0.7394
+}

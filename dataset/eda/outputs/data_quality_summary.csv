@@ -1,0 +1,4 @@
+Source,Rows,Missing_entity_id,Missing_name,Missing_name_pct,Missing_address,Missing_address_pct,Missing_country,Missing_both_pct,Duplicate_names,Duplicate_addrs,Duplicate_name_addr,Duplicate_all
+Source 1,2206821,0,0,0.0,0,0.0,0,0.0,667592,76215,0,0
+Source 2,5034616,0,2,0.0,168967,3.3561,0,0.0,632607,697354,25891,25873
+Source 3,5285603,0,13,0.0002,175916,3.3282,0,0.0,633994,652838,18881,18860

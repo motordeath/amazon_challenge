@@ -1,0 +1,216 @@
+{
+  "sample_distribution": {
+    "full_population": {
+      "n": 2206821,
+      "country_pct": {
+        "US": 59.98,
+        "India": 40.02
+      },
+      "singleton_pct": 5.585,
+      "match_count_pct": {
+        "0": 5.58,
+        "1": 5.4,
+        "2": 17.0,
+        "3": 24.05,
+        "4": 21.94,
+        "5": 14.59,
+        "6": 7.47,
+        "7": 2.9,
+        "8": 0.85,
+        "9": 0.19,
+        "10": 0.02,
+        "11": 0.0
+      }
+    },
+    "sample": {
+      "n": 500001,
+      "country_pct": {
+        "US": 59.98,
+        "India": 40.02
+      },
+      "singleton_pct": 5.585,
+      "match_count_pct": {
+        "0": 5.58,
+        "1": 5.4,
+        "2": 17.0,
+        "3": 24.05,
+        "4": 21.94,
+        "5": 14.59,
+        "6": 7.47,
+        "7": 2.9,
+        "8": 0.85,
+        "9": 0.19,
+        "10": 0.02,
+        "11": 0.0
+      }
+    }
+  },
+  "n_s1_sampled": 500001,
+  "n_candidate_pairs": 8787553,
+  "blocking_recall": {
+    "total_true_pairs": 1730632,
+    "retrieved_true_pairs": 832216,
+    "blocking_recall": 0.4808740390793652,
+    "n_candidate_pairs": 8787553,
+    "avg_candidates_per_s1": 18.69922884100591
+  },
+  "n_positive_pairs": 832216,
+  "n_negative_pairs": 7955337,
+  "feature_engineering_rss_mb": {
+    "before": 11035.8,
+    "after": 650.2,
+    "delta": -10385.6
+  },
+  "training_time_sec": 64.0,
+  "feature_importance": [
+    {
+      "feature": "address_token_jaccard",
+      "importance_gain": 81229039.396914,
+      "importance_split": 2257
+    },
+    {
+      "feature": "address_ngram_jaccard",
+      "importance_gain": 20319475.93802762,
+      "importance_split": 2035
+    },
+    {
+      "feature": "address_length_ratio",
+      "importance_gain": 13361454.421814442,
+      "importance_split": 2241
+    },
+    {
+      "feature": "name_ngram_jaccard",
+      "importance_gain": 10934641.384774208,
+      "importance_split": 2269
+    },
+    {
+      "feature": "address_number_jaccard",
+      "importance_gain": 6211068.434363365,
+      "importance_split": 1323
+    },
+    {
+      "feature": "name_token_jaccard",
+      "importance_gain": 2548601.643518448,
+      "importance_split": 2272
+    },
+    {
+      "feature": "blocking_rank",
+      "importance_gain": 2102501.7744865417,
+      "importance_split": 1194
+    },
+    {
+      "feature": "address_levenshtein_ratio",
+      "importance_gain": 2063875.5312891006,
+      "importance_split": 1586
+    },
+    {
+      "feature": "name_core_jaro_winkler",
+      "importance_gain": 1456512.6028470993,
+      "importance_split": 2498
+    },
+    {
+      "feature": "name_length_ratio",
+      "importance_gain": 1073565.9702224731,
+      "importance_split": 2510
+    },
+    {
+      "feature": "blocking_score",
+      "importance_gain": 935152.540081501,
+      "importance_split": 1386
+    },
+    {
+      "feature": "name_jaro_winkler",
+      "importance_gain": 884782.1075220108,
+      "importance_split": 2292
+    },
+    {
+      "feature": "name_levenshtein_ratio",
+      "importance_gain": 816180.1010100842,
+      "importance_split": 2613
+    },
+    {
+      "feature": "candidate_is_s2",
+      "importance_gain": 760590.7402114868,
+      "importance_split": 573
+    },
+    {
+      "feature": "address_jaro_winkler",
+      "importance_gain": 394005.2476630211,
+      "importance_split": 1516
+    },
+    {
+      "feature": "name_exact_compact",
+      "importance_gain": 285463.0573091507,
+      "importance_split": 144
+    },
+    {
+      "feature": "name_suffix_overlap",
+      "importance_gain": 280066.2381839752,
+      "importance_split": 662
+    },
+    {
+      "feature": "candidate_pool_size",
+      "importance_gain": 246089.4584197998,
+      "importance_split": 722
+    },
+    {
+      "feature": "name_exact_core",
+      "importance_gain": 142082.22856521606,
+      "importance_split": 311
+    },
+    {
+      "feature": "score_gap_to_best",
+      "importance_gain": 54882.54870414734,
+      "importance_split": 564
+    },
+    {
+      "feature": "address_exact_compact",
+      "importance_gain": 13775.242057800293,
+      "importance_split": 26
+    },
+    {
+      "feature": "name_exact_normalized",
+      "importance_gain": 467.1923065185547,
+      "importance_split": 6
+    },
+    {
+      "feature": "s1_address_missing",
+      "importance_gain": 0.0,
+      "importance_split": 0
+    },
+    {
+      "feature": "either_address_missing",
+      "importance_gain": 0.0,
+      "importance_split": 0
+    },
+    {
+      "feature": "cand_address_missing",
+      "importance_gain": 0.0,
+      "importance_split": 0
+    },
+    {
+      "feature": "address_exact_normalized",
+      "importance_gain": 0.0,
+      "importance_split": 0
+    },
+    {
+      "feature": "country_match",
+      "importance_gain": 0.0,
+      "importance_split": 0
+    }
+  ],
+  "threshold": {
+    "tau": 0.9000000000000002,
+    "macro_f_beta": 0.648400534089955
+  },
+  "validation": {
+    "n_entities": 100001,
+    "macro_f_beta": 0.648400534089955,
+    "macro_precision": 0.758264647512255,
+    "macro_recall": 0.4905825202209738,
+    "singleton_count": 5738,
+    "singleton_accuracy": 0.9416172882537469,
+    "singleton_false_positive_rate": 0.05838271174625309,
+    "multi_match_count": 94263
+  }
+}

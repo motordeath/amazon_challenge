@@ -1,0 +1,4 @@
+Source,File,Rows,Columns,Memory_MB,File_Size_MB,Unique_IDs,ID_Prefixes,Load_Time_s
+Source 1,train_source1.tsv,2206821,4,604.4,200.3,2206821,{'S1-': 2206821},13.37
+Source 2,train_source2.tsv,5034616,4,1418.8,466.6,5034616,{'S2-': 5034616},34.05
+Source 3,train_source3.tsv,5285603,4,1478.5,480.4,5285603,{'S3-': 5285603},34.74

@@ -1,0 +1,19 @@
+# Large datasets
+dataset/train/*.tsv
+dataset/test/*.tsv
+
+# Large generated outputs
+output/candidate_pairs.tsv
+scratch/blocking_analysis_gt.csv
+
+# Large datasets
+dataset/train/*.tsv
+dataset/test/*.tsv
+
+# Kaggle copies
+kaggle_data/train/*.tsv
+kaggle_data/test/*.tsv
+
+# Large generated outputs
+output/candidate_pairs.tsv
+scratch/blocking_analysis_gt.csv

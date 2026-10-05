@@ -1,231 +1,149 @@
 # Business Entity Resolution Pipeline
 
-A high-performance, reproducible machine learning pipeline designed to perform large-scale entity resolution and record linkage between noisy business entities and reference enterprise registries.
+Solution for the ML Challenge 2026 Business Entity Resolution task: given a
+deduplicated reference source (S1) and two noisy operational sources (S2,
+S3), predict every S2/S3 record that refers to the same real-world business
+as each S1 entity. An S1 entity may have zero, one, or many matches. Scored
+by macro-averaged F₀.₅ (precision-weighted).
 
----
+See `../../eda_findings.md` for the full EDA this design is based on, and
+`../../problem_statement.md` for the original task spec.
 
-## 1. Project Overview
-This repository contains the complete end-to-end solution for the Business Entity Resolution ML hackathon challenge. The pipeline scales to large entity databases by employing a multi-strategy blocking architecture, robust feature engineering across lexical and geographic modalities, a gradient-boosted decision tree ranker (LightGBM), data-driven decision threshold calibration, and greedy bipartite one-to-one matching constraints.
+## 1. Architecture
 
-## 2. Problem Statement
-The challenge requires linking records from an uncurated source entity table to a canonical reference target catalog. Real-world business data suffers from significant noise:
-- Corporate designation variations (`LLC`, `Limited`, `GmbH`, `Inc.`, `Corp.`)
-- Multilingual diacritics, character encoding artifacts, and casing disparities
-- Fragmented and abbreviated street addresses
-- Quadratic comparison complexity ($O(N \times M)$) preventing brute-force pair scoring
-
-## 3. Approach
-Our approach balances recall and precision through a phased funnel architecture:
-1. **Normalization**: Canonical text cleaning, legal suffix extraction/stripping, and street address standardization.
-2. **Multi-Strategy Blocking**: Tri-part candidate generation via subword TF-IDF, postal/geographic grouping, and dense semantic subspace projection.
-3. **Lossless Candidate Union**: Merging candidate streams while preserving all candidate pairs and candidate origins.
-4. **Rich Feature Engineering**: Multi-modal similarity vectors spanning string edit distances, token sets, geographic markers, and candidate group rankings.
-5. **LightGBM Classification & Scoring**: Gradient-boosted decision trees trained to estimate match probabilities.
-6. **Threshold Optimization**: Calibrating decision thresholds on validation sets to optimize macro F-beta.
-7. **One-to-One Matching Constraint**: Global greedy assignment preventing duplicate record linkage.
-8. **Invariant Output Assembly & Verification**: Atomic generation of `candidate_pairs.tsv` and `matching_results.tsv` from the exact same scored candidate pool.
-
-## 4. Repository Structure
-```text
-team_name_submission/
-│
-├── output/
-│   ├── matching_results.tsv             # Final 1-to-1 resolved entity matches
-│   └── candidate_pairs.tsv              # Identical candidate pairs scored by model
-│
-├── code/
-│   └── business_entity_resolution/
-│       ├── src/
-│       │   ├── config.py                # Centralized pipeline configuration
-│       │
-│       │   ├── normalize/               # Text, legal suffix & address normalization
-│       │   │   ├── text_clean.py
-│       │   │   ├── legal_suffixes.py
-│       │   │   ├── address_parse.py
-│       │   │   └── run_normalize.py
-│       │
-│       │   ├── blocking/                # Multi-strategy candidate generation
-│       │   │   ├── tfidf_blocker.py
-│       │   │   ├── address_blocker.py
-│       │   │   ├── embedding_blocker.py
-│       │   │   ├── union_blocks.py
-│       │   │   └── recall_eval.py
-│       │
-│       │   ├── features/                # Feature extraction & matrix assembly
-│       │   │   ├── name_similarity.py
-│       │   │   ├── address_similarity.py
-│       │   │   ├── country_features.py
-│       │   │   ├── rank_features.py
-│       │   │   └── build_feature_matrix.py
-│       │
-│       │   ├── model/                   # LightGBM training, thresholding & inference
-│       │   │   ├── train_lgbm.py
-│       │   │   ├── threshold_tuning.py
-│       │   │   ├── one_to_one_constraint.py
-│       │   │   └── predict.py
-│       │
-│       │   ├── postprocess/             # Output assembly & integrity verification
-│       │   │   ├── assemble_outputs.py
-│       │   │   └── sanity_checks.py
-│       │
-│       │   ├── evaluation/              # Macro F-beta & country-level diagnostics
-│       │   │   ├── f_beta_macro.py
-│       │   │   └── cross_country_eval.py
-│       │
-│       │   ├── artifacts/               # Serialized weights, vectorizers, thresholds
-│       │   │   └── .gitkeep
-│       │
-│       │   └── run_pipeline.py          # Master single entry point
-│       │
-│       ├── README.md                    # Solution guide & operational manual
-│       └── requirements.txt             # Pinned project dependencies
-│
-└── Documentation_template.md            # Hackathon methodology documentation
+```
+Raw TSV (S1/S2/S3, ground truth)
+    │
+    ▼
+data/loader.py            memory-conscious load, compact dtypes (pyarrow strings, categorical country)
+    │
+    ▼
+normalization/            names.py, addresses.py — multiple preserved representations
+    │                     (raw / normalized / compact / core / tokens / char-ngrams),
+    │                     never a single destructive canonical string
+    ▼
+blocking/                 country-strict, multi-channel union:
+    │                       - exact.py:        exact name_compact match
+    │                       - tfidf_blocker.py: char-ngram TF-IDF kNN on name AND on address
+    │                     candidate_generator.py unions channels, caps top-K per S1
+    ▼
+features/                 name/address similarity (Jaro-Winkler, Levenshtein, Jaccard on
+    │                     tokens/ngrams/numbers), country agreement, blocking rank/score
+    ▼
+models/train_lgbm.py      LightGBM binary classifier, GroupKFold on source1_entity_id
+    │                     (leakage guard — EDA section 12)
+    ▼
+models/threshold.py       grid-search decision threshold maximizing macro F₀.₅ on a
+    │                     held-out validation split
+    ▼
+models/one_to_one_constraint.py
+    │                     reverse-uniqueness constraint: an S2/S3 record can belong to
+    │                     at most one S1 (100% true in ground truth — EDA section 7);
+    │                     keeps only the highest-scoring S1 claim per candidate
+    ▼
+postprocess/              assemble_outputs.py writes matching_results.tsv / candidate_pairs.tsv;
+                          sanity_checks.py verifies the submission invariants
 ```
 
-## 5. Environment Setup
-- Python version: 3.10+ recommended (compatible with 3.9+)
-- Operating system: Linux, macOS, or Windows
-- Memory: Minimum 8 GB RAM (16 GB recommended for large catalogs)
+## 2. Why this design
 
-Create and activate an isolated virtual environment:
+- **Country is never hard-coded.** `country` is compared as an open string
+  label everywhere; blocking partitions `groupby("country")` dynamically so
+  test-only `France` is handled automatically (task spec section on
+  open-set country; EDA section 6).
+- **Blocking is a union of channels, never an intersection** (task spec
+  section 11F): exact match, name TF-IDF, and address TF-IDF are combined so
+  a Devanagari-script S2 name with a still-Latin-script address (EDA section
+  4) is still recoverable via the address channel even when the name channel
+  fails outright.
+- **Normalization preserves multiple representations** instead of one
+  aggressive canonical string, because the EDA flags full suffix-stripping,
+  number removal, and stopword removal as "potentially dangerous" — e.g.
+  `Summit Inc` vs `Summit LLC` may only differ by the legal suffix.
+- **The decision layer is not `argmax`.** 89% of S1 entities have 2+ true
+  matches (EDA section 7), so the final step keeps every candidate above a
+  tuned threshold, not just the single best one — while singleton entities
+  (5.58%) are handled correctly by predicting an empty set when nothing
+  clears the bar.
+- **Reverse-uniqueness post-processing** exploits a hard invariant found in
+  the ground truth (0% of S2/S3 records match more than one S1 entity) to
+  remove conflicting low-confidence claims without ever removing a
+  legitimate multi-match for the correct S1 entity.
+
+## 3. Environment setup
+
 ```bash
-# On Linux / macOS
-python3 -m venv venv
-source venv/bin/activate
-
-# On Windows (PowerShell)
 python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-
-## 6. Installation Instructions
-Install the pinned dependencies:
-```bash
-pip install --upgrade pip
+source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## 7. Dataset / Input Expectations
-The pipeline expects tabular data (`.csv` or `.tsv`) with the following fields:
-- **Source Entities (`source_entities.csv`)**:
-  - `id`: Unique identifier for the source record
-  - `name`: Business entity legal/trading name
-  - `address` (optional): Street address
-  - `postal_code` (optional): Postal or ZIP code
-  - `country` (optional): Two-letter ISO country code
-- **Target Entities (`target_entities.csv`)**:
-  - `id`: Unique identifier for the target reference record
-  - `name`: Canonical business name
-  - `address` (optional): Physical street address
-  - `postal_code` (optional): Postal or ZIP code
-  - `country` (optional): Two-letter ISO country code
-- **Ground Truth Matches (`ground_truth.tsv`, optional for training/eval)**:
-  - `source_id`: Source record identifier
-  - `target_id`: True matching target record identifier
+Python 3.10+ recommended. All models/libraries used (LightGBM, scikit-learn,
+rapidfuzz) are MIT/BSD-licensed and far under the 8B-parameter cap (LightGBM
+trees have no "parameters" in the LLM sense; the largest artifact is a few
+hundred trees at `num_leaves=63`).
 
-## 8. Configuration
-All hyperparameters, file paths, and execution flags are centrally defined in `src/config.py`:
-- `paths`: Input/output directories and artifact locations
-- `blocking`: Subword n-gram range, top-$k$ candidates, and similarity thresholds
-- `features`: Feature toggles for name, address, country, and ranking signals
-- `model`: LightGBM boosting parameters, learning rate, tree depth, and random seeds
-- `threshold`: Search grid bounds and F-beta objective parameter
+## 4. Reproduction
 
-## 9. How to Train
-To train the LightGBM model on labeled data and calibrate the decision threshold:
+Run from this directory (`code/business_entity_resolution/`). Paths to the
+dataset are resolved from `config.py` relative to the repo root
+(`<repo>/dataset/train`, `<repo>/dataset/test`) — no other configuration is
+required if the repo layout is preserved.
+
 ```bash
-cd code/business_entity_resolution
-python src/run_pipeline.py --train \
-  --source path/to/source_entities.csv \
-  --target path/to/target_entities.csv \
-  --ground-truth path/to/ground_truth.tsv
-```
-This trains the model, saves `artifacts/lgbm_model.joblib`, and records the optimal threshold in `artifacts/optimal_threshold.json`.
+# 1. Train: normalizes, blocks, engineers features, trains LightGBM,
+#    tunes the decision threshold, and writes artifacts/*.joblib + *.json
+python -m business_entity_resolution train
 
-## 10. How to Run Inference
-To run scoring on new entity datasets using previously trained artifacts:
-```bash
-cd code/business_entity_resolution
-python src/run_pipeline.py \
-  --source path/to/source_entities.csv \
-  --target path/to/target_entities.csv
+# 2. Predict: loads the saved artifacts, runs the same blocking + feature
+#    pipeline on dataset/test, and writes both submission files
+python -m business_entity_resolution predict
+
+# Or both in one call:
+python -m business_entity_resolution full-pipeline
 ```
 
-## 11. How to Run the Complete Pipeline
-Execute the full end-to-end pipeline (train, tune, predict, enforce 1-to-1 constraints, verify sanity, and export outputs):
+Outputs land in `<repo>/output/matching_results.tsv` and
+`<repo>/output/candidate_pairs.tsv` by default (override with
+`--matching-out` / `--candidate-out` on `predict`).
+
+`--nrows N` on any subcommand truncates each input file to its first N rows
+for a fast dev/debug run (rows are **not** ID-aligned across files at small
+N, so blocking recall on a truncated run is not meaningful — use it only to
+check the code path runs, not to judge quality).
+
+### Validate before submitting
+
 ```bash
-cd code/business_entity_resolution
-python src/run_pipeline.py --train \
-  --source path/to/source_entities.csv \
-  --target path/to/target_entities.csv \
-  --ground-truth path/to/ground_truth.tsv \
-  --output-candidates ../../output/candidate_pairs.tsv \
-  --output-matching ../../output/matching_results.tsv
+cd ../..   # repo root == student_resource-equivalent layout
+python3 utils/validate_submission.py \
+    --matching output/matching_results.tsv \
+    --candidate output/candidate_pairs.tsv \
+    --test-dir dataset/test
 ```
 
-## 12. Blocking Methodology
-To scale beyond full Cartesian products:
-- **Subword TF-IDF Blocker**: Generates character 2-to-4-grams within word boundaries. Sparse matrix cosine similarity retrieves the top-$k$ nearest neighbors per source entity.
-- **Geographic Blocker**: Groups records sharing identical Postal Codes + Country Codes, or clean address strings.
-- **Dense Embedding Blocker**: Applies Truncated SVD over subword space to capture semantic latent similarities.
-- **Lossless Union**: Merges candidate sets into a consolidated table without dropping candidates.
+## 5. Reproducibility
 
-## 13. Feature Engineering
-The feature matrix $X$ integrates four core feature families:
-- **Name Signals**: Normalized Levenshtein ratio, Jaro-Winkler similarity, Token-Sort ratio, Token-Set intersection, Longest Common Prefix (LCP) ratio, base name similarities, and legal suffix match indicator.
-- **Address Signals**: Cleaned address string edit distances, token set overlap, postal code exact and prefix match indicators.
-- **Country Signals**: Country code agreement, cross-border mismatch flag, and missingness indicators.
-- **Ranking Signals**: Candidate rank within the source entity group, score delta from the top-1 candidate, and candidate pool cardinality.
+- `RANDOM_SEED = 42` in `config.py` is threaded through the GroupKFold split
+  and LightGBM's `random_state`.
+- All hyperparameters (blocking caps, feature toggles, model params,
+  threshold grid) live in `config.py` — nothing is hard-coded deeper in the
+  pipeline.
+- Dependencies are pinned to major/minor floors in `requirements.txt`.
 
-## 14. ML Model
-- **Algorithm**: LightGBM Classifier (`gbdt`)
-- **Objective**: Binary logloss (`binary`)
-- **Imbalance Handling**: Configurable `scale_pos_weight` to account for high negative-to-positive candidate ratios.
-- **Regularization**: Early stopping on out-of-fold validation data to prevent overfitting.
+## 6. Fair-play / license notes
 
-## 15. Threshold Selection
-Instead of hard-coding an arbitrary 0.50 cutoff:
-- The validation probability distribution is searched over a fine-grained grid $\tau \in [0.05, 0.95]$ with step size 0.01.
-- The threshold that maximizes the macro F-beta score is automatically identified and saved into `artifacts/optimal_threshold.json`.
+- No external data, APIs, geocoders, or business registries are used
+  anywhere in the pipeline — every signal is derived from
+  `business_name` / `business_address` / `country` in the provided TSVs.
+- Model: LightGBM (MIT license), a gradient-boosted tree ensemble — not an
+  LLM, well under the 8B-parameter constraint.
 
-## 16. One-to-One Matching
-When target catalogs represent distinct organizational entities, multiple source records cannot link to the same target record, nor can one source record resolve to multiple targets:
-- Greedy bipartite matching sorts candidate pairs in descending order of predicted probability.
-- Mutual exclusive assignment commits the highest-confidence pair and eliminates competing candidates.
+## 7. Known limitations / next steps
 
-## 17. Evaluation Methodology
-- **Macro F-beta Metric**: Implemented in `src/evaluation/f_beta_macro.py`, supporting entity-averaged macro metrics and global pair-level calculations.
-- **Cross-Country Diagnostics**: Evaluated in `src/evaluation/cross_country_eval.py` to identify performance disparities across distinct national jurisdictions.
-
-## 18. Output Format
-Two standard tab-delimited files are emitted:
-1. `output/candidate_pairs.tsv`:
-   ```text
-   source_id	target_id
-   src_001	tgt_014
-   src_001	tgt_089
-   ```
-2. `output/matching_results.tsv`:
-   ```text
-   source_id	target_id
-   src_001	tgt_014
-   ```
-
-## 19. Reproducibility
-- Random seed fixed across NumPy, Scikit-learn, and LightGBM (`random_seed = 42`).
-- Pinned dependency requirements in `requirements.txt`.
-- Deterministic feature calculation order and tie-breaking in one-to-one constraint solvers.
-
-## 20. Sanity Checks
-Automated pre-export checks enforced in `src/postprocess/sanity_checks.py`:
-- Zero null or empty source/target identifiers.
-- Zero duplicate candidate or matching pairs.
-- Invariant verification: Matching pairs are a strict subset of candidate pairs.
-- Strict one-to-one constraint compliance (no duplicate `source_id` or `target_id`).
-- Correct TSV delimiter, UTF-8 encoding, and header validation.
-
-## 21. Important Assumptions
-- Entities in the reference target table represent unique business records.
-- Records without addresses or postal codes rely primarily on name similarity and subword blocking.
-- Missing country codes are treated as neutral signals rather than hard negative matches.
+See `notebooks/08_error_analysis.ipynb` for the empirical breakdown. In
+summary: address-missing candidates (~3.3% of S2/S3) lean entirely on name
+similarity; Devanagari-script names rely on the address TF-IDF channel for
+blocking recall since char n-grams across scripts never match on the name
+channel itself; both are documented failure modes rather than silently
+dropped.

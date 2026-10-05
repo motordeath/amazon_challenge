@@ -1,0 +1,9 @@
+{
+  "title": "Amazon Entity Resolution Dataset",
+  "id": "fuckinggpu/amazon-entity-resolution-data",
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ]
+}

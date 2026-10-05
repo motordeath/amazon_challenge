@@ -1,0 +1,10 @@
+{
+  "n_entities": 49998,
+  "macro_f_beta": 0.643049273637278,
+  "macro_precision": 0.7547801197762196,
+  "macro_recall": 0.48447507741579504,
+  "singleton_count": 2792,
+  "singleton_accuracy": 0.9251432664756447,
+  "singleton_false_positive_rate": 0.07485673352435529,
+  "multi_match_count": 47206
+}

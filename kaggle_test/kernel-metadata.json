@@ -1,0 +1,22 @@
+{
+ "id": "fuckinggpu/abb-aar-ya-paar",
+ "id_no": 136064694,
+ "title": "abb_aar_ya_paar",
+ "code_file": "abb-aar-ya-paar.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": false,
+ "enable_tpu": false,
+ "enable_internet": true,
+ "keywords": [],
+ "dataset_sources": [
+  "fuckinggpu/amazon-entity-resolution-data",
+  "fuckinggpu/business-entity-resolution-source"
+ ],
+ "kernel_sources": [],
+ "competition_sources": [],
+ "model_sources": [],
+ "docker_image": "gcr.io/kaggle-private-byod/python@sha256:37c64f7dd9c54116ecd1bcc88817c5469b88387388fade02bfa8bf3fc647d461",
+ "machine_shape": "Standard"
+}

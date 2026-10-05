@@ -1,0 +1,94 @@
+{
+  "experiment_id": "EXP-001",
+  "config_changes": {
+    "token_max_df_abs_other": 400
+  },
+  "sample_distribution": {
+    "full_population": {
+      "n": 2206821,
+      "country_pct": {
+        "US": 59.98,
+        "India": 40.02
+      },
+      "singleton_pct": 5.585,
+      "match_count_pct": {
+        "0": 5.58,
+        "1": 5.4,
+        "2": 17.0,
+        "3": 24.05,
+        "4": 21.94,
+        "5": 14.59,
+        "6": 7.47,
+        "7": 2.9,
+        "8": 0.85,
+        "9": 0.19,
+        "10": 0.02,
+        "11": 0.0
+      }
+    },
+    "sample": {
+      "n": 500002,
+      "country_pct": {
+        "US": 59.98,
+        "India": 40.02
+      },
+      "singleton_pct": 5.585,
+      "match_count_pct": {
+        "0": 5.58,
+        "1": 5.4,
+        "2": 17.0,
+        "3": 24.05,
+        "4": 21.94,
+        "5": 14.59,
+        "6": 7.47,
+        "7": 2.9,
+        "8": 0.85,
+        "9": 0.19,
+        "10": 0.02,
+        "11": 0.0
+      }
+    }
+  },
+  "n_s1_sampled": 500002,
+  "uncapped_blocking_recall": {
+    "total_true_pairs": 1730636,
+    "retrieved_true_pairs": 1155129,
+    "blocking_recall": 0.6674592461961961,
+    "n_candidate_pairs": 29629557,
+    "avg_candidates_per_s1": 60.238471062534686
+  },
+  "capped_blocking_recall": {
+    "total_true_pairs": 1730636,
+    "retrieved_true_pairs": 918614,
+    "blocking_recall": 0.5307956150224542,
+    "n_candidate_pairs": 11424200,
+    "avg_candidates_per_s1": 23.226008445303748
+  },
+  "n_candidate_pairs": 11424200,
+  "blocking_runtime_sec": 1115.4,
+  "blocking_peak_rss_mb": 15826.7,
+  "n_positive_pairs": 918614,
+  "n_negative_pairs": 10505586,
+  "feature_engineering_rss_mb": {
+    "before": 15116.8,
+    "after": 11054.0,
+    "delta": -4062.8
+  },
+  "feature_engineering_time_sec": 699.1,
+  "training_time_sec": 227.6,
+  "threshold": {
+    "tau": 0.9100000000000003,
+    "macro_f_beta": 0.6832515798281772
+  },
+  "validation": {
+    "n_entities": 100001,
+    "macro_f_beta": 0.6832515798281772,
+    "macro_precision": 0.784075401309479,
+    "macro_recall": 0.5344474048044512,
+    "singleton_count": 5678,
+    "singleton_accuracy": 0.932546671363156,
+    "singleton_false_positive_rate": 0.06745332863684395,
+    "multi_match_count": 94323
+  },
+  "total_runtime_sec": 2494.1
+}
